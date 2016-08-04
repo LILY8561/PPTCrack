@@ -54,16 +54,18 @@ string&   replace_all(string&   str, const   string&   old_value, const   string
 
 int main(int argc, char** argv)
 {
-    cout << "ppt path" << endl;
 
-    string file;
-    std::cin >> file;
+    cout << "请输入PPT所在路径:" << endl;
+    char input[1000];
+    cin.getline(input, sizeof(input));
+
+    string file = input;
 
     vector<string> vec;
     vec.reserve(100);
     getFiles(file, vec);
 
-    cout << "start decode ...";
+    cout << "该目录下总共有" << vec.size()<<"个PPT/PPTX文件"<<endl;
 
     for (size_t i = 0; i < vec.size(); ++i)
     {
@@ -77,10 +79,11 @@ int main(int argc, char** argv)
 
         string cmd = string("7z x ") + "\"" + vec[i] + "\" -o" + genPath;
 
-        cout << "开始转换..." << endl;
+        cout << "解压缩" << endl;
 
         system(cmd.c_str());
 
+        cout << "清除密码" << endl;
         string filename = vec[i].substr(vec[i].rfind("\\") + 1, vec[i].rfind(".") + 1);
 
         filename = filename.substr(0, filename.rfind("."));
@@ -93,6 +96,13 @@ int main(int argc, char** argv)
         string str(beg, end);
 
         size_t left = str.find("<p:modifyVerifier");
+        if (left == size_t(-1))
+        {
+            cout << filename<<"PPT无需解密!!!" << endl;
+            cmd = "copy  \"" + vec[i] + "\"" + " D:\\Temp";
+            system(cmd.c_str());
+            continue;
+        }
 
         string strLeft = str.substr(0, left);
 
@@ -137,6 +147,8 @@ int main(int argc, char** argv)
         system(tmp.c_str());
 
         cout << "删除缓存" << endl;
+
+        cout << "文件名:" << newfile << endl;
     }
 
     cout << "全部转换完成啦 ^-^ " << endl;
